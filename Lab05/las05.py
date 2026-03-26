@@ -253,7 +253,20 @@ def generuj_las(liczba_roslin=18, rozmiar_pola=10.0, seed=42):
     scene = bpy.context.scene
     scene.render.engine = 'BLENDER_EEVEE'
     
-    out_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "las05.png")
+    if bpy.data.filepath:
+        base_dir = os.path.dirname(bpy.data.filepath)
+    else:
+        try:
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+            if not os.path.isdir(base_dir):
+                base_dir = os.path.dirname(base_dir)
+        except NameError:
+            base_dir = "/tmp"
+            
+    if not base_dir or not os.path.isdir(base_dir):
+        base_dir = "/tmp"
+
+    out_path = os.path.join(base_dir, "las05.png")
     scene.render.filepath = out_path
     scene.render.image_settings.file_format = 'PNG'
     scene.render.resolution_x = 1200
