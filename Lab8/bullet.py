@@ -1,15 +1,17 @@
 import math
+
 import pyray as pr
 
-from config import BULLET_SPEED, BULLET_TTL, BULLET_RADIUS, SCREEN_W, SCREEN_H
+from config import BULLET_SPEED, BULLET_TTL, BULLET_RADIUS
+from utils import SCREENW, SCREENH
 
 
 class Bullet:
-    def __init__(self, x: float, y: float, angle_rad: float):
-        self.x      = x
-        self.y      = y
-        self.vx     = math.sin(angle_rad) * BULLET_SPEED
-        self.vy     = -math.cos(angle_rad) * BULLET_SPEED
+    def __init__(self, x: float, y: float, angle_rad: float) -> None:
+        self.x  = x
+        self.y  = y
+        self.vx = math.sin(angle_rad) * BULLET_SPEED
+        self.vy = -math.cos(angle_rad) * BULLET_SPEED
         self.radius = BULLET_RADIUS
         self.ttl    = BULLET_TTL
         self.alive  = True
@@ -20,9 +22,8 @@ class Bullet:
         self.ttl -= dt
         if self.ttl <= 0:
             self.alive = False
-        # zawijanie krawedzi
-        self.x %= SCREEN_W
-        self.y %= SCREEN_H
+        self.x %= SCREENW
+        self.y %= SCREENH
 
     def draw(self) -> None:
         pr.draw_circle(int(self.x), int(self.y), self.radius, pr.YELLOW)

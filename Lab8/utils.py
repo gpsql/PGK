@@ -1,12 +1,13 @@
 import math
-from config import SCREEN_W, SCREEN_H
+from typing import TypeVar
 
-SCREENW: int = SCREEN_W
-SCREENH: int = SCREEN_H
+SCREENW: int = 800
+SCREENH: int = 600
 
+_T = TypeVar("_T")
 
 def ghost_positions(x: float, y: float, size: float) -> list[tuple[float, float]]:
-    """Zwraca liste pozycji do rysowania obiektu z efektem widmo na krawedziach."""
+    """zwraca liste pozycji 'widmowych' do rysowania przy krawedziach ekranu"""
     xs: list[float] = [x]
     ys: list[float] = [y]
 
@@ -22,13 +23,12 @@ def ghost_positions(x: float, y: float, size: float) -> list[tuple[float, float]
 
     return [(px, py) for px in xs for py in ys]
 
-
-def circles_collide(x1: float, y1: float, r1: float,
-                    x2: float, y2: float, r2: float) -> bool:
-    """Zwraca True jesli okregi wpadaja na siebie."""
+def circles_collide(
+    x1: float, y1: float, r1: float,
+    x2: float, y2: float, r2: float,
+) -> bool:
+    """zwraca true jesli dwa okregi nachodza na siebie"""
     return math.hypot(x2 - x1, y2 - y1) < r1 + r2
 
-
-def alive_only(objects: list) -> list:
-    """Zwraca liste obiektow, ktore maja alive == True."""
-    return [obj for obj in objects if obj.alive]
+def alive_only(objects: list[_T]) -> list[_T]:
+    return [obj for obj in objects if obj.alive]  
