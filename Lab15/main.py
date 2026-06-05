@@ -8,17 +8,27 @@ def main():
     app_state = "MENU" # MENU, GAME
     game = None
 
+    difficulty = "NORMAL"
+
     while not pr.window_should_close():
         dt = pr.get_frame_time()
 
         if app_state == "MENU":
+            if pr.is_key_pressed(pr.KEY_ONE):
+                difficulty = "EASY"
+            elif pr.is_key_pressed(pr.KEY_TWO):
+                difficulty = "NORMAL"
+            elif pr.is_key_pressed(pr.KEY_THREE):
+                difficulty = "HARD"
+                
             if pr.is_key_pressed(pr.KEY_ENTER):
-                game = Game()
+                game = Game(difficulty)
                 app_state = "GAME"
                 
             pr.begin_drawing()
             pr.clear_background(pr.BLACK)
-            pr.draw_text("NIGHT THIEF", 250, 200, 50, pr.WHITE)
+            pr.draw_text("NIGHT THIEF", 250, 150, 50, pr.WHITE)
+            pr.draw_text(f"Difficulty: {difficulty} (Press 1, 2, or 3 to change)", 180, 250, 20, pr.GREEN)
             pr.draw_text("Press ENTER to start", 300, 300, 20, pr.GRAY)
             pr.draw_text("Controls: WASD to move", 300, 350, 20, pr.GRAY)
             pr.draw_text("Right Click to throw rock (distract)", 250, 380, 20, pr.GRAY)

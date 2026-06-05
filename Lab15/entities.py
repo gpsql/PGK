@@ -88,10 +88,10 @@ class Guard:
         self.target_x = 0
         self.target_y = 0
 
-    def update(self, dt, player, rocks):
+    def update(self, dt, player, rocks, wall_col_func):
         # FSM Logic
         if self.state == self.STATE_PATROL:
-            self._move_towards(self.path[self.path_idx][0], self.path[self.path_idx][1], self.speed, dt)
+            self._move_towards(self.path[self.path_idx][0], self.path[self.path_idx][1], self.speed, dt, wall_col_func)
             if self._distance_to(self.path[self.path_idx][0], self.path[self.path_idx][1]) < 5:
                 self.path_idx = (self.path_idx + 1) % len(self.path)
             
@@ -108,7 +108,7 @@ class Guard:
                     self.suspicious_timer = 3.0
 
         elif self.state == self.STATE_SUSPICIOUS:
-            self._move_towards(self.target_x, self.target_y, self.speed, dt)
+            self._move_towards(self.target_x, self.target_y, self.speed, dt, wall_col_func)
             self.suspicious_timer -= dt
             if self.suspicious_timer <= 0:
                 self.state = self.STATE_RETURN
@@ -116,7 +116,7 @@ class Guard:
                 self.state = self.STATE_CHASE
 
         elif self.state == self.STATE_CHASE:
-            self._move_towards(player.x, player.y, self.chase_speed, dt)
+            self._move_towards(player.x, player.y, self.chase_speed, dt, wall_col_func)
             if not self._can_see(player.x, player.y):
                 self.state = self.STATE_SUSPICIOUS
                 self.target_x = player.x
@@ -133,7 +133,7 @@ class Guard:
                     min_dist = d
                     closest_idx = i
             
-            self._move_towards(self.path[closest_idx][0], self.path[closest_idx][1], self.speed, dt)
+            self._move_towards(self.path[closest_idx][0], self.path[closest_idx][1], self.speed, dt, wall_col_func)
             if self._distance_to(self.path[closest_idx][0], self.path[closest_idx][1]) < 5:
                 self.path_idx = closest_idx
                 self.state = self.STATE_PATROL
@@ -141,13 +141,21 @@ class Guard:
             if self._can_see(player.x, player.y):
                 self.state = self.STATE_CHASE
 
-    def _move_towards(self, tx, ty, speed, dt):
+    def _move_towards(self, tx, ty, speed, dt, wall_col_func):
         dx = tx - self.x
         dy = ty - self.y
         dist = math.sqrt(dx*dx + dy*dy)
         if dist > 0:
-            self.x += (dx/dist) * speed * dt
-            self.y += (dy/dist) * speed * dt
+            mx = (dx/dist) * speed * dt
+            my = (dy/dist) * speed * dt
+            
+            self.x += mx
+            if wall_col_func(self.x, self.y, self.radius):
+                self.x -= mx
+                
+            self.y += my
+            if wall_col_func(self.x, self.y, self.radius):
+                self.y -= my
 
     def _distance_to(self, tx, ty):
         return math.sqrt((tx - self.x)**2 + (ty - self.y)**2)

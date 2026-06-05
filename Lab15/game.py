@@ -3,7 +3,7 @@ from entities import Player, Guard, Rock
 import math
 
 class Game:
-    def __init__(self):
+    def __init__(self, difficulty="NORMAL"):
         self.walls = [
             pr.Rectangle(0, 0, 800, 20),
             pr.Rectangle(0, 580, 800, 20),
@@ -24,6 +24,17 @@ class Game:
             Guard([(250, 100), (650, 100), (650, 450), (250, 450)]),
             Guard([(100, 300), (100, 500), (350, 500), (350, 300)])
         ]
+        
+        for g in self.guards:
+            if difficulty == "EASY":
+                g.speed = 50
+                g.chase_speed = 80
+                g.vision_range = 100
+            elif difficulty == "HARD":
+                g.speed = 100
+                g.chase_speed = 150
+                g.vision_range = 220
+        
         self.rocks = []
         
         self.state = "PLAYING" # PLAYING, WIN, LOSS
@@ -69,7 +80,7 @@ class Game:
 
         # Update Guards
         for g in self.guards:
-            g.update(dt, self.player, self.rocks)
+            g.update(dt, self.player, self.rocks, self._check_wall_collision)
             
             # Guard Vision Collision (Simple Line of Sight Check)
             if g.state == Guard.STATE_CHASE:
