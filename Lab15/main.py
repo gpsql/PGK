@@ -36,10 +36,19 @@ def main():
             pr.end_drawing()
 
         elif app_state == "GAME":
+            if pr.is_key_pressed(pr.KEY_M):
+                app_state = "MENU"
+                game = None
+                continue
+
             game.update(dt)
             
             pr.begin_drawing()
             game.draw()
+            
+            # Draw exit to menu prompt
+            if game.state == "PLAYING":
+                pr.draw_text("Press M for Menu", 600, 10, 20, pr.GRAY)
             
             if game.state == "WIN":
                 pr.draw_rectangle(0, 0, 800, 600, pr.fade(pr.BLACK, 0.7))
