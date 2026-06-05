@@ -1,0 +1,40 @@
+[gd_scene load_steps=6 format=3 uid="uid://lab14boss"]
+
+[ext_resource type="Script" path="res://boss.gd" id="1_boss"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_boss"]
+size = Vector3(3.0, 1.5, 3.0)
+
+[sub_resource type="StandardMaterial3D" id="Mat_boss"]
+albedo_color = Color(0.18, 0.0, 0.55, 1.0)
+emission_enabled = true
+emission = Color(0.1, 0.0, 0.45, 1.0)
+emission_energy_multiplier = 1.8
+
+[sub_resource type="BoxShape3D" id="BoxShape_p1"]
+size = Vector3(3.6, 2.0, 3.6)
+
+[sub_resource type="BoxShape3D" id="BoxShape_p2"]
+size = Vector3(1.6, 1.0, 1.6)
+
+[node name="Boss" type="Node3D"]
+script = ExtResource("1_boss")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_boss")
+surface_material_override/0 = SubResource("Mat_boss")
+
+[node name="HitboxPhase1" type="Area3D" parent="."]
+collision_layer = 2
+collision_mask = 4
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="HitboxPhase1"]
+shape = SubResource("BoxShape_p1")
+
+[node name="HitboxPhase2" type="Area3D" parent="."]
+collision_layer = 2
+collision_mask = 4
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="HitboxPhase2"]
+shape = SubResource("BoxShape_p2")
+disabled = true
