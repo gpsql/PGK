@@ -26,7 +26,7 @@ class Game:
         ]
         
         self.keys = [
-            pr.Rectangle(650, 450, 20, 20)
+            pr.Rectangle(100, 500, 20, 20)
         ]
         
         self.cameras = [
