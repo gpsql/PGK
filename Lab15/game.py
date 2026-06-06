@@ -16,7 +16,11 @@ class Game:
             pr.Rectangle(200, 280, 100, 20)
         ]
         
-        self.artifact_rect = pr.Rectangle(420, 200, 30, 30)
+        self.artifacts = [pr.Rectangle(420, 200, 30, 30)]
+        if difficulty in ["NORMAL", "HARD"]:
+            self.artifacts.append(pr.Rectangle(100, 50, 30, 30))
+            self.artifacts.append(pr.Rectangle(650, 520, 30, 30))
+            
         self.exit_rect = pr.Rectangle(20, 500, 60, 60)
         
         self.player = Player(50, 50)
@@ -31,8 +35,8 @@ class Game:
                 g.chase_speed = 80
                 g.vision_range = 100
             elif difficulty == "HARD":
-                g.speed = 100
-                g.chase_speed = 150
+                g.speed = 80
+                g.chase_speed = 120
                 g.vision_range = 220
         
         self.rocks = []
@@ -89,9 +93,11 @@ class Game:
                     pr.play_sound(self.snd_caught)
 
         # Artifact Pickup
-        if not self.player.has_artifact:
-            if pr.check_collision_circle_rec(pr.Vector2(self.player.x, self.player.y), self.player.radius, self.artifact_rect):
-                self.player.has_artifact = True
+        for i in range(len(self.artifacts) - 1, -1, -1):
+            if pr.check_collision_circle_rec(pr.Vector2(self.player.x, self.player.y), self.player.radius, self.artifacts[i]):
+                self.artifacts.pop(i)
+                
+        self.player.has_artifact = len(self.artifacts) == 0
 
         # Win Condition
         if self.player.has_artifact:
@@ -116,10 +122,10 @@ class Game:
         pr.draw_rectangle_rec(self.exit_rect, pr.GREEN if self.player.has_artifact else pr.DARKGREEN)
         pr.draw_text("EXIT", int(self.exit_rect.x + 10), int(self.exit_rect.y + 20), 20, pr.WHITE)
 
-        # Draw Artifact
-        if not self.player.has_artifact:
-            pr.draw_rectangle_rec(self.artifact_rect, pr.GOLD)
-            pr.draw_text("ART", int(self.artifact_rect.x), int(self.artifact_rect.y + 10), 10, pr.BLACK)
+        # Draw Artifacts
+        for art in self.artifacts:
+            pr.draw_rectangle_rec(art, pr.GOLD)
+            pr.draw_text("ART", int(art.x), int(art.y + 10), 10, pr.BLACK)
 
         # Draw Walls
         for w in self.walls:
