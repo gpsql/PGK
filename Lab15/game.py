@@ -86,6 +86,13 @@ class Game:
         # Player Movement
         dx, dy = self.player.update(dt)
         
+        # Check Doors Unlock
+        for i in range(len(self.doors) - 1, -1, -1):
+            if pr.check_collision_circle_rec(pr.Vector2(self.player.x, self.player.y), self.player.radius + 5, self.doors[i]):
+                if self.player.keys_inventory > 0:
+                    self.doors.pop(i)
+                    self.player.keys_inventory -= 1
+        
         # Collision X
         self.player.x += dx
         if self._check_wall_collision(self.player.x, self.player.y, self.player.radius):
@@ -156,16 +163,6 @@ class Game:
         # Check Doors
         for d in self.doors:
             if pr.check_collision_circle_rec(pr.Vector2(x, y), radius, d):
-                # If player hits door and has key, unlock it
-                # We need to identify if it's the player calling this. 
-                # Since Guards also call this, we should only let the player unlock it.
-                # A simple way: check if this (x,y) matches the player's EXACT current intent.
-                # Actually, let's just do it directly here for the player.
-                if self.player.keys_inventory > 0 and self.player.x == x and self.player.y == y:
-                    # Player is hitting the door, unlock it
-                    self.doors.remove(d)
-                    self.player.keys_inventory -= 1
-                    return False
                 return True
                 
         return False
