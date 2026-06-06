@@ -1,26 +1,25 @@
-# Night Thief (PGK Lab15 Project)
+# Night Thief (PGK Lab 15)
 
-## Description
-**Night Thief** is a 2D top-down stealth game where you play as a thief trying to steal a precious artifact from a heavily guarded area. Your objective is to navigate the map, avoid the vision cones of patrolling guards, grab the artifact (the yellow square), and reach the exit (the green square).
+## Opis gry
+Night Thief to gra zręcznościowa typu "stealth" (skradanka) w środowisku 2D. Gracz (niebieska kulka) musi przekraść się przez strzeżony poziom, zebrać wszystkie żółte artefakty, a następnie uciec do strefy "EXIT". Gracz musi unikać wzroku strażników, korzystać z ukryć, zarządzać staminą podczas sprintu oraz odwracać uwagę wrogów za pomocą rzucanych kamieni. Na mapie znajduje się też kamera monitoringu i zamek blokujący drogę do wyjścia.
 
-## Engine and Running Instructions
-This project was built using **Python 3** and the **Raylib** library (specifically `raylib-python-cffi`). 
+## Technologia i uruchomienie
+Projekt został napisany w języku **Python 3** z wykorzystaniem biblioteki **Raylib** (pakiet `pyray` / `raylib-python-cffi`).
+Aby uruchomić grę:
+1. Upewnij się, że masz zainstalowanego Pythona (wersja >= 3.8).
+2. Zainstaluj bibliotekę Raylib: `pip install raylib`
+3. Uruchom plik główny: `python main.py`
+*(Dźwięki w grze generowane są za pomocą dołączonego skryptu `audio_generator.py` - pliki .wav są już w repozytorium).*
 
-To run the game:
-1. Ensure you have Python 3 installed.
-2. Install the necessary bindings via pip: `pip install raylib`
-3. Run the game from the command line: `python3 main.py`
+## Własny mechanizm wykraczający poza oryginał (Cechy unikalne)
+1. **Prawdziwe Pole Widzenia (FOV) i System Hałasu**: W przeciwieństwie do prostego sprawdzania odległości, strażnicy i kamery używają stożkowego pola widzenia (obliczanego za pomocą iloczynu skalarnego), przez co gracz może zakraść się bezpiecznie od tyłu. Dodatkowo wdrożono system "sprintu" ze staminą — bieg podwaja prędkość, ale generuje hałas, który alarmuje pobliskich wrogów. 
+2. **Zaawansowana maszyna stanów (FSM) z pamięcią i celami**: Strażnicy operują na 4 stanach (`PATROL`, `SUSPICIOUS`, `CHASE`, `RETURN`). Gdy usłyszą kamień lub bieg gracza, przechodzą w stan podejrzenia i idą sprawdzić konkretne źródło dźwięku, po czym samodzielnie wyznaczają ścieżkę powrotu do najbliższego punktu swojego patrolu.
 
-*Note: The `.wav` audio files were generated using the included `audio_generator.py` script.*
+*Wskazanie tego wymogu:* Powyższe mechaniki (zaawansowane FOV, Stamina, System Dźwięku) znacznie wykraczają poza prostą logikę przeciwników prezentowaną na zajęciach (np. w Asteroids), dając grze wymiar taktyczny.
 
-## Custom Mechanic
-**Rock Toss Distraction**
-By right-clicking anywhere on the screen, the player can throw a "rock". When the rock lands, any guard within hearing distance will abandon their standard patrol route to investigate the sound (Suspicious state). If they find nothing, they will eventually return to their post. This allows the player to manipulate guard positioning to sneak past them.
+## Czy gra jest klonem?
+Projekt nie jest bezpośrednim klonem żadnej konkretnej gry. Czerpie jednak inspirację z klasycznych tytułów typu "stealth" z widokiem z góry (np. wczesne etapy *Metal Gear Solid* na PS1 lub *Hotline Miami* w wariancie bez przemocy), przekładając ich koncepcje na minimalistyczną oprawę 2D.
 
-## Inspiration / Clone Information
-This project is heavily inspired by early 2D top-down stealth games, particularly the VR Training missions from **Metal Gear Solid** (PS1).
-
-## Known Bugs and Limitations
-- Collision detection with walls uses simple AABB (Axis-Aligned Bounding Box) logic against a circle, which can occasionally result in slightly "sticky" movement if sliding perfectly along a wall corner.
-- Guard vision is a simple 360-degree radius check rather than a directional view cone, meaning they will spot you if you get too close even from behind (they have "eyes on the back of their heads"). Vision cannot pass through walls, but this basic line-of-sight check isn't implemented for simplicity.
-- Rocks travel to the exact click coordinate linearly; they do not have parabolic physics.
+## Znane bugi i ograniczenia
+- Mechanika rzutu kamieniem (prawy przycisk myszy) nie posiada zaawansowanej kolizji ze ścianami podczas lotu — kamień przelatuje nad przeszkodami i aktywuje się w miejscu kliknięcia. W realiach gry traktowane jest to jako rzut lobem "ponad ścianami".
+- Strażnicy poruszają się w oparciu o wektory i prostą detekcję kolizji. Przy bardzo rzadkich, nienaturalnych układach geometrii mogą zachowywać się "sztywno" ślizgając się po ścianach.

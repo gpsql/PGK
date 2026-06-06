@@ -29,7 +29,7 @@ class Player:
             dx /= length
             dy /= length
 
-        # Sprinting logic
+        # Mechanika biegania (sprint) ograniczona staminą
         speed = self.base_speed
         self.is_sprinting = False
         
@@ -52,7 +52,7 @@ class Player:
         if self.keys_inventory > 0:
             pr.draw_circle(int(self.x) + 12, int(self.y) - 12, 4, pr.SKYBLUE)
             
-        # Draw stamina bar if not full
+        # Rysowanie paska staminy, jeśli nie jest pełny
         if self.stamina < 100:
             pr.draw_rectangle(int(self.x) - 15, int(self.y) - 20, 30, 4, pr.RED)
             pr.draw_rectangle(int(self.x) - 15, int(self.y) - 20, int(30 * (self.stamina / 100.0)), 4, pr.GREEN)
@@ -119,21 +119,21 @@ class Guard:
         self.target_y = 0
 
     def update(self, dt, player, rocks, wall_col_func):
-        # FSM Logic
+        # Maszyna stanów (FSM) dla sztucznej inteligencji strażnika
         if self.state == self.STATE_PATROL:
             self._move_towards(self.path[self.path_idx][0], self.path[self.path_idx][1], self.speed, dt, wall_col_func)
             if self._distance_to(self.path[self.path_idx][0], self.path[self.path_idx][1]) < 15:
                 self.path_idx = (self.path_idx + 1) % len(self.path)
             
-            # Check for player
+            # Sprawdzenie czy gracz znajduje się w polu widzenia (FOV)
             if self._can_see(player):
                 self.state = self.STATE_CHASE
             
-            # Check for sprinting player
+            # Sprawdzenie czy gracz biegnie (hałas w promieniu)
             if player.is_sprinting and self._distance_to(player.x, player.y) < 200:
                 self._become_suspicious(player.x, player.y)
             
-            # Check for rock sounds
+            # Sprawdzenie czy strażnik usłyszał rzucony kamień
             for rock in rocks:
                 if not rock.active and self._distance_to(rock.x, rock.y) < 200:
                     self._become_suspicious(rock.x, rock.y)
@@ -152,7 +152,7 @@ class Guard:
                 self._become_suspicious(player.x, player.y)
 
         elif self.state == self.STATE_RETURN:
-            # Move back to nearest patrol point
+            # Powrót do najbliższego punktu patrolowego
             closest_idx = 0
             min_dist = 9999
             for i, p in enumerate(self.path):
@@ -174,7 +174,7 @@ class Guard:
         self.target_x = tx
         self.target_y = ty
         self.suspicious_timer = 3.0
-        # Instantly face the sound
+        # Natychmiastowe odwrócenie się w stronę źródła dźwięku
         dx = tx - self.x
         dy = ty - self.y
         dist = math.sqrt(dx*dx + dy*dy)
@@ -187,7 +187,7 @@ class Guard:
         dy = ty - self.y
         dist = math.sqrt(dx*dx + dy*dy)
         if dist > 0:
-            # Update facing direction
+            # Aktualizacja kierunku patrzenia strażnika
             self.dir_x = dx / dist
             self.dir_y = dy / dist
             
@@ -213,7 +213,7 @@ class Guard:
         if dist > self.vision_range:
             return False
             
-        # FOV check (120 degrees = 60 degrees each side)
+        # Sprawdzenie Pola Widzenia (FOV 120 stopni)
         vx = (player.x - self.x) / dist
         vy = (player.y - self.y) / dist
         dot = self.dir_x * vx + self.dir_y * vy
@@ -228,7 +228,7 @@ class Guard:
         
         pr.draw_circle(int(self.x), int(self.y), self.radius, color)
         
-        # Vision indication (Cone)
+        # Rysowanie stożka widzenia strażnika
         if self.state == self.STATE_PATROL or self.state == self.STATE_RETURN or self.state == self.STATE_CHASE or self.state == self.STATE_SUSPICIOUS:
             cone_color = pr.RED if self.state == self.STATE_CHASE else pr.fade(pr.RED, 0.3)
             # Calculate left and right lines of the cone

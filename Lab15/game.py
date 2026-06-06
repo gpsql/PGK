@@ -10,25 +10,25 @@ class Game:
             pr.Rectangle(0, 0, 20, 600),
             pr.Rectangle(780, 0, 20, 600),
             
-            # Small locked room in top-right for the EXIT
+            # Mały zamknięty pokój w prawym górnym rogu dla wyjścia (EXIT)
             pr.Rectangle(600, 20, 20, 150),
             pr.Rectangle(600, 170, 80, 20)
         ]
         
         self.doors = [
-            pr.Rectangle(680, 170, 100, 20) # Blocks the bottom of the exit room
+            pr.Rectangle(680, 170, 100, 20) # Blokuje dół pokoju wyjściowego (drzwi)
         ]
         
         self.hiding_spots = []
         if difficulty != "HARD":
-            self.hiding_spots.append(pr.Rectangle(350, 250, 100, 100)) # Big hiding spot in the middle
+            self.hiding_spots.append(pr.Rectangle(350, 250, 100, 100)) # Duża kryjówka na środku mapy
         
         self.keys = [
             pr.Rectangle(100, 500, 20, 20)
         ]
         
         self.cameras = [
-            Camera(400, 20, 90, 60, 40) # Top middle, pointing down
+            Camera(400, 20, 90, 60, 40) # Środek u góry, skierowana w dół (kamera)
         ]
         
         self.artifacts = [pr.Rectangle(400, 450, 30, 30)]
@@ -41,7 +41,7 @@ class Game:
         self.player = Player(100, 100)
         
         self.guards = [
-            Guard([(150, 150), (150, 450), (550, 450), (550, 150)]), # Patrols in a big square
+            Guard([(150, 150), (150, 450), (550, 450), (550, 150)]), # Patroluje po dużym kwadracie
         ]
         
         if difficulty == "HARD":
@@ -84,27 +84,27 @@ class Game:
     def update(self, dt):
         if self.state != "PLAYING": return
 
-        # Player Movement
+        # Obsługa ruchu gracza
         dx, dy = self.player.update(dt)
         
-        # Check Doors Unlock
+        # Sprawdzanie odblokowania drzwi (jeśli gracz ma klucz)
         for i in range(len(self.doors) - 1, -1, -1):
             if pr.check_collision_circle_rec(pr.Vector2(self.player.x, self.player.y), self.player.radius + 5, self.doors[i]):
                 if self.player.keys_inventory > 0:
                     self.doors.pop(i)
                     self.player.keys_inventory -= 1
         
-        # Collision X
+        # Obsługa kolizji w osi X
         self.player.x += dx
         if self._check_wall_collision(self.player.x, self.player.y, self.player.radius):
             self.player.x -= dx
             
-        # Collision Y
+        # Obsługa kolizji w osi Y
         self.player.y += dy
         if self._check_wall_collision(self.player.x, self.player.y, self.player.radius):
             self.player.y -= dy
 
-        # Check Hiding Spots
+        # Sprawdzanie czy gracz znajduje się w kryjówce
         self.player.is_hidden = False
         for hs in self.hiding_spots:
             if pr.check_collision_circle_rec(pr.Vector2(self.player.x, self.player.y), self.player.radius, hs):
@@ -117,7 +117,7 @@ class Game:
                 self.keys.pop(i)
                 self.player.keys_inventory += 1
 
-        # Throw Rock Mechanic
+        # Mechanika rzutu kamieniem (dźwięk odwracający uwagę)
         if pr.is_mouse_button_pressed(pr.MOUSE_BUTTON_RIGHT):
             mx = pr.get_mouse_x()
             my = pr.get_mouse_y()
@@ -134,7 +134,7 @@ class Game:
             if c.can_see(self.player):
                 self.trigger_alarm()
 
-        # Update Guards
+        # Aktualizacja stanu i pozycji strażników (wykorzystanie maszyny stanów FSM)
         for g in self.guards:
             g.update(dt, self.player, self.rocks, self._check_wall_collision)
             
@@ -143,14 +143,14 @@ class Game:
                 self.state = "LOSS"
                 pr.play_sound(self.snd_caught)
 
-        # Artifact Pickup
+        # Podnoszenie artefaktów
         for i in range(len(self.artifacts) - 1, -1, -1):
             if pr.check_collision_circle_rec(pr.Vector2(self.player.x, self.player.y), self.player.radius, self.artifacts[i]):
                 self.artifacts.pop(i)
                 
         self.player.has_artifact = len(self.artifacts) == 0
 
-        # Win Condition
+        # Warunek wygranej
         if self.player.has_artifact:
             if pr.check_collision_circle_rec(pr.Vector2(self.player.x, self.player.y), self.player.radius, self.exit_rect):
                 self.state = "WIN"
