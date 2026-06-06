@@ -10,19 +10,17 @@ class Game:
             pr.Rectangle(0, 0, 20, 600),
             pr.Rectangle(780, 0, 20, 600),
             
-            # Dividers
-            pr.Rectangle(300, 0, 20, 200),
-            pr.Rectangle(300, 300, 20, 300),
-            pr.Rectangle(500, 300, 300, 20)
+            # Small locked room in top-right for the EXIT
+            pr.Rectangle(600, 20, 20, 150),
+            pr.Rectangle(600, 170, 80, 20)
         ]
         
         self.doors = [
-            pr.Rectangle(300, 200, 20, 100) # Blocks the main gap
+            pr.Rectangle(680, 170, 100, 20) # Blocks the bottom of the exit room
         ]
         
         self.hiding_spots = [
-            pr.Rectangle(50, 250, 60, 100),
-            pr.Rectangle(350, 50, 80, 60)
+            pr.Rectangle(350, 250, 100, 100) # Big hiding spot in the middle
         ]
         
         self.keys = [
@@ -30,21 +28,20 @@ class Game:
         ]
         
         self.cameras = [
-            Camera(770, 570, 225, 45, 30) # Bottom right, pointing up-left, sweeping
+            Camera(400, 20, 90, 60, 40) # Top middle, pointing down
         ]
         
-        self.artifacts = [pr.Rectangle(400, 240, 30, 30)]
+        self.artifacts = [pr.Rectangle(400, 450, 30, 30)]
         if difficulty in ["NORMAL", "HARD"]:
-            self.artifacts.append(pr.Rectangle(700, 500, 30, 30))
-            self.artifacts.append(pr.Rectangle(700, 100, 30, 30))
+            self.artifacts.append(pr.Rectangle(650, 400, 30, 30))
+            self.artifacts.append(pr.Rectangle(200, 150, 30, 30))
             
-        self.exit_rect = pr.Rectangle(700, 240, 60, 60)
+        self.exit_rect = pr.Rectangle(700, 50, 60, 60)
         
         self.player = Player(100, 100)
         
         self.guards = [
-            Guard([(150, 100), (150, 500)]),
-            Guard([(400, 100), (700, 100)])
+            Guard([(150, 150), (150, 450), (600, 450), (600, 150)]), # Patrols in a big square
         ]
         
         for g in self.guards:
