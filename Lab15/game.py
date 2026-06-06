@@ -19,9 +19,9 @@ class Game:
             pr.Rectangle(680, 170, 100, 20) # Blocks the bottom of the exit room
         ]
         
-        self.hiding_spots = [
-            pr.Rectangle(350, 250, 100, 100) # Big hiding spot in the middle
-        ]
+        self.hiding_spots = []
+        if difficulty != "HARD":
+            self.hiding_spots.append(pr.Rectangle(350, 250, 100, 100)) # Big hiding spot in the middle
         
         self.keys = [
             pr.Rectangle(100, 500, 20, 20)
@@ -50,8 +50,8 @@ class Game:
                 g.chase_speed = 80
                 g.vision_range = 100
             elif difficulty == "HARD":
-                g.speed = 80
-                g.chase_speed = 120
+                g.speed = 95
+                g.chase_speed = 140
                 g.vision_range = 220
         
         self.rocks = []
