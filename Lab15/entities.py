@@ -122,7 +122,7 @@ class Guard:
         # FSM Logic
         if self.state == self.STATE_PATROL:
             self._move_towards(self.path[self.path_idx][0], self.path[self.path_idx][1], self.speed, dt, wall_col_func)
-            if self._distance_to(self.path[self.path_idx][0], self.path[self.path_idx][1]) < 5:
+            if self._distance_to(self.path[self.path_idx][0], self.path[self.path_idx][1]) < 15:
                 self.path_idx = (self.path_idx + 1) % len(self.path)
             
             # Check for player
@@ -162,7 +162,7 @@ class Guard:
                     closest_idx = i
             
             self._move_towards(self.path[closest_idx][0], self.path[closest_idx][1], self.speed, dt, wall_col_func)
-            if self._distance_to(self.path[closest_idx][0], self.path[closest_idx][1]) < 5:
+            if self._distance_to(self.path[closest_idx][0], self.path[closest_idx][1]) < 15:
                 self.path_idx = closest_idx
                 self.state = self.STATE_PATROL
             

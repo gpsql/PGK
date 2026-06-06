@@ -41,8 +41,12 @@ class Game:
         self.player = Player(100, 100)
         
         self.guards = [
-            Guard([(150, 150), (150, 450), (600, 450), (600, 150)]), # Patrols in a big square
+            Guard([(150, 150), (150, 450), (550, 450), (550, 150)]), # Patrols in a big square
         ]
+        
+        if difficulty == "HARD":
+            self.guards.append(Guard([(400, 350), (400, 50)]))
+            self.guards.append(Guard([(250, 250), (550, 250)]))
         
         for g in self.guards:
             if difficulty == "EASY":
