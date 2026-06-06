@@ -1,5 +1,5 @@
 import pyray as pr
-from entities import Player, Guard, Rock
+from entities import Player, Guard, Rock, Camera
 import math
 
 class Game:
@@ -10,23 +10,41 @@ class Game:
             pr.Rectangle(0, 0, 20, 600),
             pr.Rectangle(780, 0, 20, 600),
             
-            pr.Rectangle(200, 150, 400, 20),
-            pr.Rectangle(200, 400, 400, 20),
-            pr.Rectangle(400, 150, 20, 150),
-            pr.Rectangle(200, 280, 100, 20)
+            # Dividers
+            pr.Rectangle(300, 0, 20, 200),
+            pr.Rectangle(300, 300, 20, 300),
+            pr.Rectangle(500, 300, 300, 20)
         ]
         
-        self.artifacts = [pr.Rectangle(420, 200, 30, 30)]
-        if difficulty in ["NORMAL", "HARD"]:
-            self.artifacts.append(pr.Rectangle(100, 50, 30, 30))
-            self.artifacts.append(pr.Rectangle(650, 520, 30, 30))
-            
-        self.exit_rect = pr.Rectangle(20, 500, 60, 60)
+        self.doors = [
+            pr.Rectangle(300, 200, 20, 100) # Blocks the main gap
+        ]
         
-        self.player = Player(50, 50)
+        self.hiding_spots = [
+            pr.Rectangle(50, 250, 60, 100),
+            pr.Rectangle(350, 50, 80, 60)
+        ]
+        
+        self.keys = [
+            pr.Rectangle(650, 450, 20, 20)
+        ]
+        
+        self.cameras = [
+            Camera(770, 570, 225, 45, 30) # Bottom right, pointing up-left, sweeping
+        ]
+        
+        self.artifacts = [pr.Rectangle(400, 240, 30, 30)]
+        if difficulty in ["NORMAL", "HARD"]:
+            self.artifacts.append(pr.Rectangle(700, 500, 30, 30))
+            self.artifacts.append(pr.Rectangle(700, 100, 30, 30))
+            
+        self.exit_rect = pr.Rectangle(700, 240, 60, 60)
+        
+        self.player = Player(100, 100)
+        
         self.guards = [
-            Guard([(250, 100), (650, 100), (650, 450), (250, 450)]),
-            Guard([(100, 300), (100, 500), (350, 500), (350, 300)])
+            Guard([(150, 100), (150, 500)]),
+            Guard([(400, 100), (700, 100)])
         ]
         
         for g in self.guards:
@@ -55,6 +73,13 @@ class Game:
         pr.unload_sound(self.snd_win)
         pr.close_audio_device()
 
+    def trigger_alarm(self):
+        if self.state == "PLAYING":
+            pr.play_sound(self.snd_caught)
+            for g in self.guards:
+                g._become_suspicious(self.player.x, self.player.y)
+                g.state = Guard.STATE_CHASE
+
     def update(self, dt):
         if self.state != "PLAYING": return
 
@@ -71,6 +96,19 @@ class Game:
         if self._check_wall_collision(self.player.x, self.player.y, self.player.radius):
             self.player.y -= dy
 
+        # Check Hiding Spots
+        self.player.is_hidden = False
+        for hs in self.hiding_spots:
+            if pr.check_collision_circle_rec(pr.Vector2(self.player.x, self.player.y), self.player.radius, hs):
+                self.player.is_hidden = True
+                break
+
+        # Check Keys
+        for i in range(len(self.keys) - 1, -1, -1):
+            if pr.check_collision_circle_rec(pr.Vector2(self.player.x, self.player.y), self.player.radius, self.keys[i]):
+                self.keys.pop(i)
+                self.player.keys_inventory += 1
+
         # Throw Rock Mechanic
         if pr.is_mouse_button_pressed(pr.MOUSE_BUTTON_RIGHT):
             mx = pr.get_mouse_x()
@@ -82,15 +120,20 @@ class Game:
         for r in self.rocks:
             r.update(dt)
 
+        # Update Cameras
+        for c in self.cameras:
+            c.update(dt)
+            if c.can_see(self.player):
+                self.trigger_alarm()
+
         # Update Guards
         for g in self.guards:
             g.update(dt, self.player, self.rocks, self._check_wall_collision)
             
-            # Guard Vision Collision (Simple Line of Sight Check)
-            if g.state == Guard.STATE_CHASE:
-                if self._check_circle_collision(self.player.x, self.player.y, self.player.radius, g.x, g.y, g.radius):
-                    self.state = "LOSS"
-                    pr.play_sound(self.snd_caught)
+            # Guard Caught Player Check
+            if g.state == Guard.STATE_CHASE and g._distance_to(self.player.x, self.player.y) < (g.radius + self.player.radius):
+                self.state = "LOSS"
+                pr.play_sound(self.snd_caught)
 
         # Artifact Pickup
         for i in range(len(self.artifacts) - 1, -1, -1):
@@ -109,15 +152,31 @@ class Game:
         for w in self.walls:
             if pr.check_collision_circle_rec(pr.Vector2(x, y), radius, w):
                 return True
+                
+        # Check Doors
+        for d in self.doors:
+            if pr.check_collision_circle_rec(pr.Vector2(x, y), radius, d):
+                # If player hits door and has key, unlock it
+                # We need to identify if it's the player calling this. 
+                # Since Guards also call this, we should only let the player unlock it.
+                # A simple way: check if this (x,y) matches the player's EXACT current intent.
+                # Actually, let's just do it directly here for the player.
+                if self.player.keys_inventory > 0 and self.player.x == x and self.player.y == y:
+                    # Player is hitting the door, unlock it
+                    self.doors.remove(d)
+                    self.player.keys_inventory -= 1
+                    return False
+                return True
+                
         return False
-
-    def _check_circle_collision(self, x1, y1, r1, x2, y2, r2):
-        dist = math.sqrt((x1-x2)**2 + (y1-y2)**2)
-        return dist < (r1 + r2)
 
     def draw(self):
         pr.clear_background(pr.RAYWHITE)
         
+        # Draw Hiding Spots
+        for hs in self.hiding_spots:
+            pr.draw_rectangle_rec(hs, pr.DARKBLUE)
+            
         # Draw Exit
         pr.draw_rectangle_rec(self.exit_rect, pr.GREEN if self.player.has_artifact else pr.DARKGREEN)
         pr.draw_text("EXIT", int(self.exit_rect.x + 10), int(self.exit_rect.y + 20), 20, pr.WHITE)
@@ -127,18 +186,29 @@ class Game:
             pr.draw_rectangle_rec(art, pr.GOLD)
             pr.draw_text("ART", int(art.x), int(art.y + 10), 10, pr.BLACK)
 
-        # Draw Walls
+        # Draw Keys
+        for k in self.keys:
+            pr.draw_rectangle_rec(k, pr.SKYBLUE)
+            pr.draw_text("KEY", int(k.x), int(k.y - 10), 10, pr.BLACK)
+
+        # Draw Walls & Doors
         for w in self.walls:
             pr.draw_rectangle_rec(w, pr.DARKGRAY)
+        for d in self.doors:
+            pr.draw_rectangle_rec(d, pr.BROWN)
+            pr.draw_text("LOCK", int(d.x - 5), int(d.y + 40), 10, pr.WHITE)
             
         # Draw Rocks
         for r in self.rocks:
             r.draw()
             
-        # Draw Player
-        self.player.draw()
-        
+        # Draw Cameras
+        for c in self.cameras:
+            c.draw()
+            
         # Draw Guards
         for g in self.guards:
             g.draw()
-
+            
+        # Draw Player
+        self.player.draw()

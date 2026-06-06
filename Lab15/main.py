@@ -30,7 +30,7 @@ def main():
             pr.draw_text("NIGHT THIEF", 250, 150, 50, pr.WHITE)
             pr.draw_text(f"Difficulty: {difficulty} (Press 1, 2, or 3 to change)", 180, 250, 20, pr.GREEN)
             pr.draw_text("Press ENTER to start", 300, 300, 20, pr.GRAY)
-            pr.draw_text("Controls: WASD to move", 300, 350, 20, pr.GRAY)
+            pr.draw_text("Controls: WASD to move, SHIFT to Sprint", 230, 350, 20, pr.GRAY)
             pr.draw_text("Right Click to throw rock (distract)", 250, 380, 20, pr.GRAY)
             pr.draw_text("Goal: Steal the yellow artifact and reach the green exit.", 150, 450, 20, pr.YELLOW)
             pr.end_drawing()
